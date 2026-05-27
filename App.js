@@ -7,6 +7,7 @@ import {
   FlatList,
   Pressable,
   Image,
+  ScrollView,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
@@ -21,24 +22,17 @@ export default function App() {
 
   const getUnPokemon = async (name) => {
     try {
-      // Intentar hacer algo
       const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
       const data = await response.json();
       console.log("Pokemon", data);
       setdetallesPokemon(data);
-      console.log("Pokemon elegido", detallesPokemon);
     } catch (error) {
-      // Si hay error
       console.log("ERROR. No se encontro el Pokemon");
     }
   };
 
-  //FUNCION PARA LLAMAR A UNA API
-  //fetch y async await
-
   const getPokemon = async () => {
     try {
-      // Intentar hacer algo
       const response = await fetch(
         "https://pokeapi.co/api/v2/pokemon?limit=50"
       );
@@ -46,7 +40,6 @@ export default function App() {
       console.log("Pokemon", data);
       setPokemon(data.results);
     } catch (error) {
-      // Si hay error
       console.log("ERROR. No fue posible acceder a la API");
     }
   };
@@ -110,8 +103,57 @@ export default function App() {
   };
 
   const detalles = ({ route }) => {
-    const { pokemon } = route.params;
-    return <Text>{pokemon.name}</Text>;
+    const { pokemon } = route.params || {};
+
+    if (!pokemon) {
+      return (
+        <View style={styles.container}>
+          <Text>No hay datos</Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.container}>
+        {/* Parte Superior - 30% */}
+        <View style={styles.topSection}>
+          <Text style={styles.nombre}>{pokemon.name.toUpperCase()}</Text>
+          <Image
+            style={styles.image}
+            source={{ uri: pokemon.sprites?.front_default }}
+          />
+        </View>
+
+        {/* Parte Inferior - 70% */}
+        <View style={styles.bottomSection}>
+          <ScrollView>
+            {/* GRID DE DOS COLUMNAS */}
+            <View style={styles.grid}>
+              {/* COLUMNA 1 - STATUS */}
+              <View style={styles.col}>
+                <Text style={styles.titulo}>Status</Text>
+                {pokemon.stats?.map((stat) => (
+                  <View key={stat.stat.name} style={styles.fila}>
+                    <Text>{stat.stat.name}:</Text>
+                    <Text>{stat.base_stat}</Text>
+                  </View>
+                ))}
+              </View>
+
+              {/* COLUMNA 2 - HABILIDADES */}
+              <View style={styles.col}>
+                <Text style={styles.titulo}>Habilidades</Text>
+                {pokemon.abilities?.map((ability, index) => (
+                  <Text key={index} style={styles.habilidad}>
+                    • {ability.ability.name}
+                  </Text>
+                ))}
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </View>
+    );
   };
 
   return (
@@ -132,10 +174,78 @@ const styles = StyleSheet.create({
   },
   lista: {
     flex: 0.5,
-    backgroundColor: "red",
+    backgroundColor: "#FF6B6B",
   },
   detalles: {
     flex: 0.5,
-    backgroundColor: "green",
+    backgroundColor: "#FFFFF0",
+  },
+
+  // ========= DECO HOME ===========
+  lista_home: {
+    flex: 0.3,
+    backgroundColor: "grey",
+  },
+  texto: {
+    color: "black",
+    fontSize: "10",
+  },
+
+  // ========== DETALLES ==========
+  // Sección Superior - 30%
+  topSection: {
+    flex: 0.3,
+    backgroundColor: "#ff6b6b",
+    justifyContent: "flex-start",
+    padding: 20,
+  },
+  // Sección Inferior - 70%
+  bottomSection: {
+    flex: 0.7,
+    backgroundColor: "#FFFFF0",
+    padding: 20,
+  },
+  // Nombre del Pokemon
+  nombre: {
+    color: "#FFFFF0",
+    fontSize: 24,
+    fontWeight: "bold",
+    alignSelf: "flex-start",
+    textAlign: "left",
+    marginLeft: 5,
+    marginTop: 5,
+  },
+  image: {
+    width: 150,
+    height: 150,
+    alignSelf: "center",
+    marginTop: 10,
+  },
+
+  // ========== GRID ==========
+  grid: {
+    flexDirection: "row",
+    marginTop: 20,
+  },
+  col: {
+    flex: 1,
+    padding: 10,
+  },
+  titulo: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  fila: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+    paddingBottom: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  habilidad: {
+    marginBottom: 10,
+    fontSize: 14,
   },
 });
