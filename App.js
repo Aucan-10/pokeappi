@@ -16,7 +16,7 @@ export default function App() {
   // HOOK DE REACT USESTATE (ESTADO)
   const [pokemon, setPokemon] = useState([]);
   const [pokemonSeleccionado, setPokemonSeleccionado] = useState(null);
-  const [detallesPokemon, setDetallesPokemon] = useState(null);
+  const [detallesPokemon, setdetallesPokemon] = useState(null);
   const Stack = createNativeStackNavigator();
 
   const getUnPokemon = async (name) => {
@@ -25,7 +25,7 @@ export default function App() {
       const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
       const data = await response.json();
       console.log("Pokemon", data);
-      setDetallesPokemon(data);
+      setdetallesPokemon(data);
       console.log("Pokemon elegido", detallesPokemon);
     } catch (error) {
       // Si hay error
@@ -84,13 +84,17 @@ export default function App() {
           {detallesPokemon ? (
             <View>
               <Image
-                height={150}
-                width={150}
+                style={{ width: 150, height: 150 }}
                 source={{ uri: detallesPokemon?.sprites?.front_default }}
+                resizeMode="contain"
               />
               <Text style={{ fontSize: 50 }}>{detallesPokemon.name}</Text>
-              <Pressable onPress={() => navigation.navigate("detalles")}>
-                <Text>Ver Detalles</Text>
+              <Pressable
+                onPress={() =>
+                  navigation.navigate("detalles", { pokemon: detallesPokemon })
+                }
+              >
+                <Text>Ver detalles</Text>
               </Pressable>
             </View>
           ) : (
@@ -105,8 +109,9 @@ export default function App() {
     );
   };
 
-  const detalles = () => {
-    return <Text>Detalles</Text>;
+  const detalles = ({ route }) => {
+    const { pokemon } = route.params;
+    return <Text>{pokemon.name}</Text>;
   };
 
   return (
