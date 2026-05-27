@@ -53,46 +53,60 @@ export default function App() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.lista}>
-          <Text>POKEAPP</Text>
-          <Text>Lista de Pokemones:</Text>
+          <Text style={styles.homeTitle}>POKEAPP</Text>
+          <Text style={styles.homeSubtitle}>Selecciona un Pokémon</Text>
           <FlatList
             data={pokemon}
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <Pressable
                 style={({ pressed }) => [
                   styles.item,
                   pressed && styles.itemPressed,
                 ]}
                 onPress={() => getUnPokemon(item.name)}
+                android_ripple={{ color: "#FFE66D", radius: 20 }} // 👈 Efecto ripple en Android
               >
-                <Text style={styles.itemText}>{item.name}</Text>
+                <View style={styles.itemContent}>
+                  {/* Número del Pokémon */}
+                  <Text style={styles.itemNumber}>
+                    #{String(index + 1).padStart(3, "0")}
+                  </Text>
+
+                  {/* Nombre con formato */}
+                  <Text style={styles.itemText}>{item.name}</Text>
+
+                  {/* Pequeña flecha decorativa */}
+                  <Text style={styles.itemArrow}>›</Text>
+                </View>
               </Pressable>
             )}
-            keyExtractor={(item) => item.url.split("/").filter(Boolean).pop()}
+            keyExtractor={(item) => item.name}
             contentContainerStyle={styles.listaContent}
+            showsVerticalScrollIndicator={false} // 👈 Ocultar barra de scroll
           />
         </View>
 
         <View style={styles.detalles}>
           {detallesPokemon ? (
-            <View>
+            <View style={styles.detallesContent}>
               <Image
-                style={{ width: 150, height: 150 }}
+                style={styles.detallesImage}
                 source={{ uri: detallesPokemon?.sprites?.front_default }}
                 resizeMode="contain"
               />
-              <Text style={{ fontSize: 50 }}>{detallesPokemon.name}</Text>
+              <Text style={styles.detallesName}>{detallesPokemon.name}</Text>
               <Pressable
                 onPress={() =>
                   navigation.navigate("detalles", { pokemon: detallesPokemon })
                 }
+                style={styles.verDetallesBtn}
               >
-                <Text>Ver detalles</Text>
+                <Text style={styles.verDetallesText}>Ver detalles</Text>
               </Pressable>
             </View>
           ) : (
             <Text style={styles.placeholder}>
-              No se seleccionó ningún pokémon
+              Seleccioná un Pokémon para ver sus detalles
             </Text>
           )}
         </View>
@@ -168,6 +182,9 @@ export default function App() {
   );
 }
 
+//  =============================
+//  --------- ESTILOS -----------
+//  =============================
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -179,6 +196,9 @@ const styles = StyleSheet.create({
   detalles: {
     flex: 0.5,
     backgroundColor: "#FFFFF0",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
 
   // ========= DECO HOME ===========
@@ -192,20 +212,17 @@ const styles = StyleSheet.create({
   },
 
   // ========== DETALLES ==========
-  // Sección Superior - 30%
   topSection: {
     flex: 0.3,
     backgroundColor: "#ff6b6b",
     justifyContent: "flex-start",
     padding: 20,
   },
-  // Sección Inferior - 70%
   bottomSection: {
     flex: 0.7,
     backgroundColor: "#FFFFF0",
     padding: 20,
   },
-  // Nombre del Pokemon
   nombre: {
     color: "#FFFFF0",
     fontSize: 24,
@@ -247,5 +264,110 @@ const styles = StyleSheet.create({
   habilidad: {
     marginBottom: 10,
     fontSize: 14,
+  },
+  // ========== LISTA MEJORADA ==========
+  listaContent: {
+    padding: 12,
+    paddingBottom: 20,
+  },
+  item: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    marginVertical: 6,
+    marginHorizontal: 4,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+  },
+  itemPressed: {
+    backgroundColor: "#FFF5E6",
+    transform: [{ scale: 0.98 }],
+    shadowOpacity: 0.15,
+    elevation: 5,
+  },
+  itemContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  itemNumber: {
+    fontSize: 12,
+    color: "#999",
+    fontWeight: "600",
+    marginRight: 12,
+    minWidth: 30,
+  },
+  itemText: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    textTransform: "capitalize",
+  },
+  itemArrow: {
+    fontSize: 24,
+    color: "#FF6B6B",
+    fontWeight: "300",
+    marginLeft: 12,
+  },
+  homeTitle: {
+    fontSize: 26,
+    fontWeight: "bold",
+    textAlign: "center",
+    paddingVertical: 6,
+    color: "white",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  homeSubtitle: {
+    fontSize: 14,
+    textAlign: "center",
+    color: "rgba(255,255,255,0.9)",
+    marginBottom: 2,
+  },
+  // ========== DETALLES ==========
+  detalles: {
+    flex: 0.5,
+    backgroundColor: "#FFFFF0",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  detallesContent: {
+    alignItems: "center",
+    width: "100%",
+    maxWidth: 300,
+  },
+  detallesImage: {
+    width: 140,
+    height: 140,
+    marginBottom: 16,
+  },
+  detallesName: {
+    fontSize: 28,
+    fontWeight: "600",
+    color: "#333",
+    textTransform: "capitalize",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  verDetallesBtn: {
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    backgroundColor: "#FF6B6B",
+    borderRadius: 12,
+  },
+  verDetallesText: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "white",
+  },
+  placeholder: {
+    fontSize: 15,
+    color: "#888",
+    textAlign: "center",
+    paddingHorizontal: 20,
   },
 });
