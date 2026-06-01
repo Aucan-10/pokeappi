@@ -1,21 +1,18 @@
+import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "../screens/HomeScreen";
 import DetailsScreen from "../screens/DetailsScreen";
 
 const Stack = createNativeStackNavigator();
 
-const AppNavigator = () => {
+export default function AppNavigator() {
   return (
     <Stack.Navigator
       initialRouteName="home"
       screenOptions={{
-        headerStyle: {
-          backgroundColor: "#FF6B6B",
-        },
+        headerStyle: { backgroundColor: "#FF6B6B" },
         headerTintColor: "#fff",
-        headerTitleStyle: {
-          fontWeight: "bold",
-        },
+        headerTitleStyle: { fontWeight: "bold" },
       }}
     >
       <Stack.Screen
@@ -30,6 +27,4 @@ const AppNavigator = () => {
       />
     </Stack.Navigator>
   );
-};
-
-export default AppNavigator;
+}

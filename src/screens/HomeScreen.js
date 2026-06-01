@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,9 +8,12 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import { fetchPokemonList, fetchPokemonByName } from "../services/pokeApi";
+import {
+  fetchPokemonList,
+  fetchPokemonByName,
+} from "../services/pokemonService";
 
-const HomeScreen = ({ navigation }) => {
+export default function HomeScreen({ navigation }) {
   const [pokemonList, setPokemonList] = useState([]);
   const [selectedPokemon, setSelectedPokemon] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,14 +47,19 @@ const HomeScreen = ({ navigation }) => {
   }, []);
 
   const renderPokemonItem = useCallback(
-    ({ item }) => (
+    ({ item, index }) => (
       <Pressable
         style={({ pressed }) => [styles.item, pressed && styles.itemPressed]}
         onPress={() => handleSelectPokemon(item.name)}
-        accessibilityRole="button"
-        accessibilityLabel={`Ver detalles de ${item.name}`}
+        android_ripple={{ color: "#FFE66D", radius: 20 }}
       >
-        <Text style={styles.itemText}>{item.name}</Text>
+        <View style={styles.itemContent}>
+          <Text style={styles.itemNumber}>
+            #{String(index + 1).padStart(3, "0")}
+          </Text>
+          <Text style={styles.itemText}>{item.name}</Text>
+          <Text style={styles.itemArrow}>›</Text>
+        </View>
       </Pressable>
     ),
     [handleSelectPokemon]
@@ -60,7 +68,7 @@ const HomeScreen = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#FF0000" />
+        <ActivityIndicator size="large" color="#FF6B6B" />
         <Text>Cargando Pokémon...</Text>
       </View>
     );
@@ -80,148 +88,130 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.lista}>
-        <Text style={styles.title}>POKEAPP</Text>
-        <Text style={styles.subtitle}>Lista de Pokemones:</Text>
+        <Text style={styles.homeTitle}>POKEAPP</Text>
+        <Text style={styles.homeSubtitle}>Selecciona un Pokémon</Text>
         <FlatList
           data={pokemonList}
           renderItem={renderPokemonItem}
           keyExtractor={(item) => item.name}
           contentContainerStyle={styles.listaContent}
-          initialNumToRender={10}
-          windowSize={5}
-          removeClippedSubviews={true}
+          showsVerticalScrollIndicator={false}
         />
       </View>
 
       <View style={styles.detalles}>
         {selectedPokemon ? (
-          <View style={styles.selectedPokemon}>
+          <View style={styles.detallesContent}>
             <Image
-              style={styles.pokemonImage}
+              style={styles.detallesImage}
               source={{ uri: selectedPokemon.sprites?.front_default }}
-              accessibilityLabel={`Imagen de ${selectedPokemon.name}`}
+              resizeMode="contain"
             />
-            <Text style={styles.pokemonName}>
-              {selectedPokemon.name.toUpperCase()}
-            </Text>
+            <Text style={styles.detallesName}>{selectedPokemon.name}</Text>
             <Pressable
-              style={styles.detailsButton}
+              style={styles.verDetallesBtn}
               onPress={() =>
                 navigation.navigate("detalles", { pokemon: selectedPokemon })
               }
-              accessibilityRole="button"
             >
-              <Text style={styles.detailsButtonText}>Ver Detalles</Text>
+              <Text style={styles.verDetallesText}>Ver detalles</Text>
             </Pressable>
           </View>
         ) : (
           <Text style={styles.placeholder}>
-            No se seleccionó ningún pokémon
+            Seleccioná un Pokémon para ver sus detalles
           </Text>
         )}
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  lista: {
-    flex: 0.5,
-    backgroundColor: "#FF6B6B",
-  },
+  container: { flex: 1 },
+  centerContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  errorText: { color: "red", marginBottom: 10 },
+  retryButton: { padding: 10, backgroundColor: "#FF6B6B", borderRadius: 8 },
+  lista: { flex: 0.5, backgroundColor: "#FF6B6B" },
   detalles: {
     flex: 0.5,
-    backgroundColor: "#4ECDC4",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    padding: 10,
-    backgroundColor: "#FFE66D",
-  },
-  subtitle: {
-    textAlign: "center",
-    padding: 5,
-    fontSize: 14,
-  },
-  listaContent: {
-    padding: 8,
-  },
-  item: {
-    padding: 15,
-    marginVertical: 4,
-    backgroundColor: "white",
-    borderRadius: 8,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  itemPressed: {
-    backgroundColor: "#FFE66D",
-    transform: [{ scale: 0.98 }],
-  },
-  itemText: {
-    fontSize: 16,
-    textTransform: "capitalize",
-  },
-  selectedPokemon: {
-    flex: 1,
+    backgroundColor: "#FFFFF0",
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: 24,
   },
-  pokemonImage: {
-    width: 150,
-    height: 150,
-    marginBottom: 20,
-  },
-  pokemonName: {
-    fontSize: 32,
+  homeTitle: {
+    fontSize: 26,
     fontWeight: "bold",
-    marginBottom: 20,
+    textAlign: "center",
+    paddingVertical: 6,
+    color: "white",
+  },
+  homeSubtitle: {
+    fontSize: 14,
+    textAlign: "center",
+    color: "rgba(255,255,255,0.9)",
+    marginBottom: 10,
+  },
+  listaContent: { padding: 12, paddingBottom: 20 },
+  item: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    marginVertical: 6,
+    marginHorizontal: 4,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+  },
+  itemPressed: { backgroundColor: "#FFF5E6", transform: [{ scale: 0.98 }] },
+  itemContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  itemNumber: {
+    fontSize: 12,
+    color: "#999",
+    fontWeight: "600",
+    marginRight: 12,
+    minWidth: 30,
+  },
+  itemText: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
     textTransform: "capitalize",
   },
-  detailsButton: {
-    backgroundColor: "#FFE66D",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    marginTop: 10,
+  itemArrow: {
+    fontSize: 24,
+    color: "#FF6B6B",
+    fontWeight: "300",
+    marginLeft: 12,
   },
-  detailsButtonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  placeholder: {
-    textAlign: "center",
-    fontSize: 16,
-    color: "#666",
-    marginTop: 50,
-  },
-  errorText: {
-    color: "#FF0000",
-    fontSize: 16,
-    textAlign: "center",
+  detallesContent: { alignItems: "center", width: "100%", maxWidth: 300 },
+  detallesImage: { width: 140, height: 140, marginBottom: 16 },
+  detallesName: {
+    fontSize: 28,
+    fontWeight: "600",
+    color: "#333",
+    textTransform: "capitalize",
     marginBottom: 20,
+    textAlign: "center",
   },
-  retryButton: {
-    backgroundColor: "#4ECDC4",
+  verDetallesBtn: {
+    paddingHorizontal: 24,
     paddingVertical: 10,
+    backgroundColor: "#FF6B6B",
+    borderRadius: 12,
+  },
+  verDetallesText: { fontSize: 15, fontWeight: "500", color: "white" },
+  placeholder: {
+    fontSize: 15,
+    color: "#888",
+    textAlign: "center",
     paddingHorizontal: 20,
-    borderRadius: 8,
   },
 });
-
-export default HomeScreen;
